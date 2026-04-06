@@ -1,5 +1,7 @@
 package com.magnum.coffe.order.service.impl;
 
+import com.magnum.coffe.notification.model.Notification;
+import com.magnum.coffe.notification.service.NotificationService;
 import com.magnum.coffe.order.dao.OrderDao;
 import com.magnum.coffe.order.model.Order;
 import com.magnum.coffe.order.model.OrderEvent;
@@ -9,16 +11,23 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     private final OrderDao dao;
     private final OrderSseService orderSseService;
+    private final NotificationService notificationService;
 
-    public OrderServiceImpl(OrderDao dao, OrderSseService orderSseService) {
+    public OrderServiceImpl(
+            OrderDao dao,
+            OrderSseService orderSseService,
+            NotificationService notificationService
+    ) {
         this.dao = dao;
         this.orderSseService = orderSseService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -39,7 +48,6 @@ public class OrderServiceImpl implements OrderService {
 
         payload.setSubtotal(subtotal);
         payload.setTotal(subtotal);
-
         payload.setCreated_at(now);
         payload.setUpdated_at(now);
 
@@ -56,6 +64,16 @@ public class OrderServiceImpl implements OrderService {
                         .message("Nouvelle commande reçue")
                         .order(saved)
                         .timestamp(System.currentTimeMillis())
+                        .build()
+        );
+
+        notificationService.create(
+                Notification.builder()
+                        .type("ORDER_CREATED")
+                        .title("Nouvelle commande")
+                        .message(buildOrderMessage(saved))
+                        .route("/admin/orders")
+                        .entityId(saved.getId())
                         .build()
         );
 
@@ -94,6 +112,47 @@ public class OrderServiceImpl implements OrderService {
                         .build()
         );
 
+        notificationService.create(
+                Notification.builder()
+                        .type("ORDER_UPDATED")
+                        .title("Commande mise à jour")
+                        .message(buildOrderMessage(saved))
+                        .route("/admin/orders")
+                        .entityId(saved.getId())
+                        .build()
+        );
+
         return saved;
+    }
+
+    private String buildOrderMessage(Order order) {
+        String tableNumber = order.getTable_number() == null || order.getTable_number().isBlank()
+                ? "—"
+                : order.getTable_number().trim();
+
+        String customerName = order.getCustomer_name() == null || order.getCustomer_name().isBlank()
+                ? "Client"
+                : order.getCustomer_name().trim();
+
+        String note = order.getNote() == null ? "" : order.getNote().trim();
+
+        String itemNames = order.getItems() == null ? "" : order.getItems().stream()
+                .map(item -> item.getProduct_name() == null ? "" : item.getProduct_name().trim())
+                .filter(name -> !name.isBlank())
+                .limit(3)
+                .collect(Collectors.joining(", "));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Table ").append(tableNumber).append(" • ").append(customerName);
+
+        if (!itemNames.isBlank()) {
+            sb.append(" • ").append(itemNames);
+        }
+
+        if (!note.isBlank()) {
+            sb.append(" • Note: ").append(note);
+        }
+
+        return sb.toString();
     }
 }

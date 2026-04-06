@@ -1,5 +1,7 @@
 package com.magnum.coffe.waiterCall.service.impl;
 
+import com.magnum.coffe.notification.model.Notification;
+import com.magnum.coffe.notification.service.NotificationService;
 import com.magnum.coffe.waiterCall.dao.WaiterCallDao;
 import com.magnum.coffe.waiterCall.model.WaiterCall;
 import com.magnum.coffe.waiterCall.model.WaiterCallEvent;
@@ -23,13 +25,16 @@ public class WaiterCallServiceImpl implements WaiterCallService {
 
     private final WaiterCallDao waiterCallDao;
     private final WaiterCallSseService waiterCallSseService;
+    private final NotificationService notificationService;
 
     public WaiterCallServiceImpl(
             WaiterCallDao waiterCallDao,
-            WaiterCallSseService waiterCallSseService
+            WaiterCallSseService waiterCallSseService,
+            NotificationService notificationService
     ) {
         this.waiterCallDao = waiterCallDao;
         this.waiterCallSseService = waiterCallSseService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -64,6 +69,16 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                         .build()
         );
 
+        notificationService.create(
+                Notification.builder()
+                        .type("WAITER_CALL_CREATED")
+                        .title("Nouvel appel serveur")
+                        .message(buildWaiterCallMessage(saved))
+                        .route("/admin/waiter-calls")
+                        .entityId(saved.getId())
+                        .build()
+        );
+
         return saved;
     }
 
@@ -86,6 +101,16 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                         .message("Appel serveur mis à jour")
                         .waiterCall(saved)
                         .timestamp(System.currentTimeMillis())
+                        .build()
+        );
+
+        notificationService.create(
+                Notification.builder()
+                        .type("WAITER_CALL_UPDATED")
+                        .title("Appel serveur mis à jour")
+                        .message(buildWaiterCallMessage(saved))
+                        .route("/admin/waiter-calls")
+                        .entityId(saved.getId())
                         .build()
         );
 
@@ -122,6 +147,16 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                         .build()
         );
 
+        notificationService.create(
+                Notification.builder()
+                        .type("WAITER_CALL_UPDATED")
+                        .title("Appel serveur mis à jour")
+                        .message(buildWaiterCallMessage(saved))
+                        .route("/admin/waiter-calls")
+                        .entityId(saved.getId())
+                        .build()
+        );
+
         return saved;
     }
 
@@ -129,5 +164,26 @@ public class WaiterCallServiceImpl implements WaiterCallService {
         if (!ALLOWED_STATUS.contains(status)) {
             throw new RuntimeException("Invalid waiter call status: " + status);
         }
+    }
+
+    private String buildWaiterCallMessage(WaiterCall call) {
+        String tableNumber = call.getTable_number() == null || call.getTable_number().isBlank()
+                ? "—"
+                : call.getTable_number().trim();
+
+        String customerName = call.getCustomer_name() == null || call.getCustomer_name().isBlank()
+                ? "Client"
+                : call.getCustomer_name().trim();
+
+        String note = call.getNote() == null ? "" : call.getNote().trim();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Table ").append(tableNumber).append(" • ").append(customerName);
+
+        if (!note.isBlank()) {
+            sb.append(" • ").append(note);
+        }
+
+        return sb.toString();
     }
 }
