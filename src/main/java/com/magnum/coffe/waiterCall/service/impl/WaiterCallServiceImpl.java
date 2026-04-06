@@ -1,9 +1,10 @@
 package com.magnum.coffe.waiterCall.service.impl;
 
-
 import com.magnum.coffe.waiterCall.dao.WaiterCallDao;
 import com.magnum.coffe.waiterCall.model.WaiterCall;
+import com.magnum.coffe.waiterCall.model.WaiterCallEvent;
 import com.magnum.coffe.waiterCall.service.WaiterCallService;
+import com.magnum.coffe.waiterCall.service.WaiterCallSseService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,9 +22,14 @@ public class WaiterCallServiceImpl implements WaiterCallService {
     );
 
     private final WaiterCallDao waiterCallDao;
+    private final WaiterCallSseService waiterCallSseService;
 
-    public WaiterCallServiceImpl(WaiterCallDao waiterCallDao) {
+    public WaiterCallServiceImpl(
+            WaiterCallDao waiterCallDao,
+            WaiterCallSseService waiterCallSseService
+    ) {
         this.waiterCallDao = waiterCallDao;
+        this.waiterCallSseService = waiterCallSseService;
     }
 
     @Override
@@ -46,7 +52,19 @@ public class WaiterCallServiceImpl implements WaiterCallService {
         payload.setCreated_at(now);
         payload.setUpdated_at(now);
 
-        return waiterCallDao.save(payload);
+        WaiterCall saved = waiterCallDao.save(payload);
+
+        waiterCallSseService.broadcast(
+                WaiterCallEvent.builder()
+                        .type("WAITER_CALL_CREATED")
+                        .waiterCallId(saved.getId())
+                        .message("Nouvel appel serveur")
+                        .waiterCall(saved)
+                        .timestamp(System.currentTimeMillis())
+                        .build()
+        );
+
+        return saved;
     }
 
     @Override
@@ -59,7 +77,19 @@ public class WaiterCallServiceImpl implements WaiterCallService {
         existing.setStatus(status);
         existing.setUpdated_at(LocalDateTime.now());
 
-        return waiterCallDao.save(existing);
+        WaiterCall saved = waiterCallDao.save(existing);
+
+        waiterCallSseService.broadcast(
+                WaiterCallEvent.builder()
+                        .type("WAITER_CALL_UPDATED")
+                        .waiterCallId(saved.getId())
+                        .message("Appel serveur mis à jour")
+                        .waiterCall(saved)
+                        .timestamp(System.currentTimeMillis())
+                        .build()
+        );
+
+        return saved;
     }
 
     @Override
@@ -80,7 +110,19 @@ public class WaiterCallServiceImpl implements WaiterCallService {
         existing.setStatus(status);
         existing.setUpdated_at(LocalDateTime.now());
 
-        return waiterCallDao.save(existing);
+        WaiterCall saved = waiterCallDao.save(existing);
+
+        waiterCallSseService.broadcast(
+                WaiterCallEvent.builder()
+                        .type("WAITER_CALL_UPDATED")
+                        .waiterCallId(saved.getId())
+                        .message("Appel serveur mis à jour")
+                        .waiterCall(saved)
+                        .timestamp(System.currentTimeMillis())
+                        .build()
+        );
+
+        return saved;
     }
 
     private void validateStatus(String status) {
