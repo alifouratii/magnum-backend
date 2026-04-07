@@ -59,7 +59,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
 
         WaiterCall saved = waiterCallDao.save(payload);
 
-        waiterCallSseService.broadcast(
+        safeBroadcast(
                 WaiterCallEvent.builder()
                         .type("WAITER_CALL_CREATED")
                         .waiterCallId(saved.getId())
@@ -69,7 +69,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                         .build()
         );
 
-        notificationService.create(
+        safeCreateNotification(
                 Notification.builder()
                         .type("WAITER_CALL_CREATED")
                         .title("Nouvel appel serveur")
@@ -94,7 +94,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
 
         WaiterCall saved = waiterCallDao.save(existing);
 
-        waiterCallSseService.broadcast(
+        safeBroadcast(
                 WaiterCallEvent.builder()
                         .type("WAITER_CALL_UPDATED")
                         .waiterCallId(saved.getId())
@@ -104,7 +104,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                         .build()
         );
 
-        notificationService.create(
+        safeCreateNotification(
                 Notification.builder()
                         .type("WAITER_CALL_UPDATED")
                         .title("Appel serveur mis à jour")
@@ -137,7 +137,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
 
         WaiterCall saved = waiterCallDao.save(existing);
 
-        waiterCallSseService.broadcast(
+        safeBroadcast(
                 WaiterCallEvent.builder()
                         .type("WAITER_CALL_UPDATED")
                         .waiterCallId(saved.getId())
@@ -147,7 +147,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                         .build()
         );
 
-        notificationService.create(
+        safeCreateNotification(
                 Notification.builder()
                         .type("WAITER_CALL_UPDATED")
                         .title("Appel serveur mis à jour")
@@ -158,6 +158,22 @@ public class WaiterCallServiceImpl implements WaiterCallService {
         );
 
         return saved;
+    }
+
+    private void safeBroadcast(WaiterCallEvent event) {
+        try {
+            waiterCallSseService.broadcast(event);
+        } catch (Exception e) {
+            System.err.println("WaiterCall SSE broadcast failed: " + e.getMessage());
+        }
+    }
+
+    private void safeCreateNotification(Notification notification) {
+        try {
+            notificationService.create(notification);
+        } catch (Exception e) {
+            System.err.println("WaiterCall notification creation failed: " + e.getMessage());
+        }
     }
 
     private void validateStatus(String status) {

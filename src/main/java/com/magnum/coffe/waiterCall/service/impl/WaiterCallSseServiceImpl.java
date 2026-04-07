@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,16 +22,28 @@ public class WaiterCallSseServiceImpl implements WaiterCallSseService {
         emitters.add(emitter);
 
         emitter.onCompletion(() -> emitters.remove(emitter));
-        emitter.onTimeout(() -> emitters.remove(emitter));
-        emitter.onError((ex) -> emitters.remove(emitter));
+        emitter.onTimeout(() -> {
+            emitters.remove(emitter);
+            emitter.complete();
+        });
+        emitter.onError((ex) -> {
+            emitters.remove(emitter);
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
+        });
 
         try {
             emitter.send(SseEmitter.event()
                     .name("connected")
                     .data("connected"));
         } catch (IOException e) {
-            emitter.complete();
             emitters.remove(emitter);
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
         }
 
         return emitter;
@@ -38,14 +51,23 @@ public class WaiterCallSseServiceImpl implements WaiterCallSseService {
 
     @Override
     public void broadcast(WaiterCallEvent event) {
+        List<SseEmitter> deadEmitters = new ArrayList<>();
+
         for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event()
                         .name(event.getType())
                         .data(event));
             } catch (Exception e) {
-                emitter.complete();
-                emitters.remove(emitter);
+                deadEmitters.add(emitter);
+            }
+        }
+
+        for (SseEmitter deadEmitter : deadEmitters) {
+            emitters.remove(deadEmitter);
+            try {
+                deadEmitter.complete();
+            } catch (Exception ignored) {
             }
         }
     }

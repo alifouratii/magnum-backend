@@ -57,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order saved = dao.save(payload);
 
-        orderSseService.broadcast(
+        safeBroadcast(
                 OrderEvent.builder()
                         .type("ORDER_CREATED")
                         .orderId(saved.getId())
@@ -67,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
                         .build()
         );
 
-        notificationService.create(
+        safeCreateNotification(
                 Notification.builder()
                         .type("ORDER_CREATED")
                         .title("Nouvelle commande")
@@ -102,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order saved = dao.save(existing);
 
-        orderSseService.broadcast(
+        safeBroadcast(
                 OrderEvent.builder()
                         .type("ORDER_UPDATED")
                         .orderId(saved.getId())
@@ -112,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
                         .build()
         );
 
-        notificationService.create(
+        safeCreateNotification(
                 Notification.builder()
                         .type("ORDER_UPDATED")
                         .title("Commande mise à jour")
@@ -123,6 +123,22 @@ public class OrderServiceImpl implements OrderService {
         );
 
         return saved;
+    }
+
+    private void safeBroadcast(OrderEvent event) {
+        try {
+            orderSseService.broadcast(event);
+        } catch (Exception e) {
+            System.err.println("Order SSE broadcast failed: " + e.getMessage());
+        }
+    }
+
+    private void safeCreateNotification(Notification notification) {
+        try {
+            notificationService.create(notification);
+        } catch (Exception e) {
+            System.err.println("Order notification creation failed: " + e.getMessage());
+        }
     }
 
     private String buildOrderMessage(Order order) {
