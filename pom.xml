@@ -8,10 +8,10 @@
 		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.labAccess</groupId>
+	<groupId>com.magnum</groupId>
 	<artifactId>lunar</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>labAccess</name>
+	<name>magnum</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
