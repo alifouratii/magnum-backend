@@ -18,4 +18,5 @@ public interface MenuCategoryDao {
     void deleteById(String id);
 
     boolean existsById(String id);
+    void deleteAll();
 }

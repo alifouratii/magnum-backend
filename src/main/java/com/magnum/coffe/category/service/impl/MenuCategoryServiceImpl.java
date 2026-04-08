@@ -115,4 +115,8 @@ public class MenuCategoryServiceImpl implements MenuCategoryService {
             }
         }
     }
+    @Override
+    public void deleteAll() {
+        menuCategoryDao.deleteAll();
+    }
 }

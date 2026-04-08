@@ -17,4 +17,5 @@ public interface MenuCategoryService {
     MenuCategory update(String id, MenuCategory payload);
 
     void delete(String id);
+    void deleteAll();
 }

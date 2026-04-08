@@ -46,4 +46,8 @@ public class MenuCategoryDaoImpl implements MenuCategoryDao {
     public boolean existsById(String id) {
         return menuCategoryRepository.existsById(id);
     }
+    @Override
+    public void deleteAll() {
+        menuCategoryRepository.deleteAll();
+    }
 }

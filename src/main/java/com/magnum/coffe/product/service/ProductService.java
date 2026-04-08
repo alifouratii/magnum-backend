@@ -19,4 +19,6 @@ public interface ProductService {
     Product update(String id, Product payload);
 
     void delete(String id);
+
+    void deleteAll();
 }

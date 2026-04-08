@@ -71,6 +71,11 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
+    public void deleteAll() {
+        productRepository.deleteAll();
+    }
+
+    @Override
     public boolean existsById(String id) {
         return productRepository.existsById(id);
     }

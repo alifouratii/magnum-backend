@@ -50,4 +50,9 @@ public class ProductController {
     public void delete(@PathVariable String id) {
         productService.delete(id);
     }
+
+    @DeleteMapping("/all")
+    public void deleteAll() {
+        productService.deleteAll();
+    }
 }

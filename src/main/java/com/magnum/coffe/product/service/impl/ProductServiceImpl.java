@@ -128,6 +128,11 @@ public class ProductServiceImpl implements ProductService {
         productDao.deleteById(id);
     }
 
+    @Override
+    public void deleteAll() {
+        productDao.deleteAll();
+    }
+
     private void normalize(Product payload) {
         if (payload.getCategoryId() != null) {
             payload.setCategoryId(payload.getCategoryId().trim());

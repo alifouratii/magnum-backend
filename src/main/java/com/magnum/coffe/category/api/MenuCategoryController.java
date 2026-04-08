@@ -46,4 +46,8 @@ public class MenuCategoryController {
     public void delete(@PathVariable String id) {
         menuCategoryService.delete(id);
     }
+    @DeleteMapping("/all")
+    public void deleteAll() {
+        menuCategoryService.deleteAll();
+    }
 }

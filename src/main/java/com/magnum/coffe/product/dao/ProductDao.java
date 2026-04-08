@@ -27,5 +27,7 @@ public interface ProductDao {
 
     void deleteById(String id);
 
+    void deleteAll();
+
     boolean existsById(String id);
 }
