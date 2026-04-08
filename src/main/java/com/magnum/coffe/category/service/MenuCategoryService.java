@@ -12,6 +12,8 @@ public interface MenuCategoryService {
 
     MenuCategory create(MenuCategory payload);
 
+    List<MenuCategory> createMany(List<MenuCategory> payloads);
+
     MenuCategory update(String id, MenuCategory payload);
 
     void delete(String id);

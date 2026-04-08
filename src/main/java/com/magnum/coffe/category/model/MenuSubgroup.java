@@ -15,6 +15,7 @@ public class MenuSubgroup {
 
     private String id;
     private String title;
+    private Integer sort_order = 0;
     private List<MenuItem> items = new ArrayList<>();
 
 

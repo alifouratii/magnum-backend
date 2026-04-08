@@ -1,9 +1,5 @@
 package com.magnum.coffe.product.service;
 
-
-
-
-
 import com.magnum.coffe.product.model.Product;
 
 import java.util.List;
@@ -17,6 +13,8 @@ public interface ProductService {
     Product getById(String id);
 
     Product create(Product payload);
+
+    List<Product> createMany(List<Product> payloads);
 
     Product update(String id, Product payload);
 

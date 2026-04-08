@@ -72,6 +72,31 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> createMany(List<Product> payloads) {
+        if (payloads == null || payloads.isEmpty()) {
+            return List.of();
+        }
+
+        List<Product> products = new ArrayList<>();
+
+        for (Product payload : payloads) {
+            normalize(payload);
+
+            if (payload.getCreatedAt() == null) {
+                payload.setCreatedAt(LocalDateTime.now());
+            }
+
+            if (payload.getUpdatedAt() == null) {
+                payload.setUpdatedAt(payload.getCreatedAt());
+            }
+
+            products.add(payload);
+        }
+
+        return productDao.saveAll(products);
+    }
+
+    @Override
     public Product update(String id, Product payload) {
         Product existing = productDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));

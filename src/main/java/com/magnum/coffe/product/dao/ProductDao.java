@@ -1,10 +1,5 @@
 package com.magnum.coffe.product.dao;
 
-
-
-
-
-
 import com.magnum.coffe.product.model.Product;
 
 import java.util.List;
@@ -27,6 +22,8 @@ public interface ProductDao {
     Optional<Product> findById(String id);
 
     Product save(Product product);
+
+    List<Product> saveAll(List<Product> products);
 
     void deleteById(String id);
 

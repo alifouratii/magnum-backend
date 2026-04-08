@@ -1,7 +1,5 @@
 package com.magnum.coffe.product.api;
 
-
-
 import com.magnum.coffe.product.model.Product;
 import com.magnum.coffe.product.service.ProductService;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +34,11 @@ public class ProductController {
     @PostMapping
     public Product create(@RequestBody Product payload) {
         return productService.create(payload);
+    }
+
+    @PostMapping("/bulk")
+    public List<Product> createMany(@RequestBody List<Product> payloads) {
+        return productService.createMany(payloads);
     }
 
     @PutMapping("/{id}")

@@ -32,6 +32,11 @@ public class MenuCategoryController {
         return menuCategoryService.create(payload);
     }
 
+    @PostMapping("/bulk")
+    public List<MenuCategory> createMany(@RequestBody List<MenuCategory> payloads) {
+        return menuCategoryService.createMany(payloads);
+    }
+
     @PutMapping("/{id}")
     public MenuCategory update(@PathVariable String id, @RequestBody MenuCategory payload) {
         return menuCategoryService.update(id, payload);

@@ -1,10 +1,12 @@
 package com.magnum.coffe.category.service.impl;
 
-import com.magnum.coffe.category.service.MenuCategoryService;
 import com.magnum.coffe.category.dao.MenuCategoryDao;
 import com.magnum.coffe.category.model.MenuCategory;
+import com.magnum.coffe.category.model.MenuSubgroup;
+import com.magnum.coffe.category.service.MenuCategoryService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -32,21 +34,24 @@ public class MenuCategoryServiceImpl implements MenuCategoryService {
 
     @Override
     public MenuCategory create(MenuCategory payload) {
-        payload.setId(null);
-
-        if (payload.getName() == null || payload.getName().isBlank()) {
-            payload.setName(payload.getTitle());
-        }
-
-        if (payload.getSubgroups() == null) {
-            payload.setSubgroups(List.of());
-        }
-
-        if (payload.getItems() == null) {
-            payload.setItems(List.of());
-        }
-
+        normalizeCategory(payload);
         return menuCategoryDao.save(payload);
+    }
+
+    @Override
+    public List<MenuCategory> createMany(List<MenuCategory> payloads) {
+        if (payloads == null || payloads.isEmpty()) {
+            return List.of();
+        }
+
+        List<MenuCategory> categories = new ArrayList<>();
+
+        for (MenuCategory payload : payloads) {
+            normalizeCategory(payload);
+            categories.add(payload);
+        }
+
+        return menuCategoryDao.saveAll(categories);
     }
 
     @Override
@@ -64,8 +69,8 @@ public class MenuCategoryServiceImpl implements MenuCategoryService {
         existing.setIcon(payload.getIcon());
         existing.setIs_active(payload.getIs_active());
         existing.setSort_order(payload.getSort_order());
-        existing.setSubgroups(payload.getSubgroups());
-        existing.setItems(payload.getItems());
+        existing.setSubgroups(payload.getSubgroups() == null ? List.of() : payload.getSubgroups());
+        existing.setItems(payload.getItems() == null ? List.of() : payload.getItems());
 
         return menuCategoryDao.save(existing);
     }
@@ -76,5 +81,38 @@ public class MenuCategoryServiceImpl implements MenuCategoryService {
             throw new RuntimeException("Category not found with id: " + id);
         }
         menuCategoryDao.deleteById(id);
+    }
+
+    private void normalizeCategory(MenuCategory payload) {
+        if (payload == null) {
+            throw new RuntimeException("Category payload is null");
+        }
+
+        if (payload.getName() == null || payload.getName().isBlank()) {
+            payload.setName(payload.getTitle());
+        }
+
+        if (payload.getSubgroups() == null) {
+            payload.setSubgroups(List.of());
+        }
+
+        if (payload.getItems() == null) {
+            payload.setItems(List.of());
+        }
+
+        if (payload.getIs_active() == null) {
+            payload.setIs_active(true);
+        }
+
+
+
+        for (MenuSubgroup subgroup : payload.getSubgroups()) {
+            if (subgroup.getItems() == null) {
+                subgroup.setItems(List.of());
+            }
+            if (subgroup.getSort_order() == null) {
+                subgroup.setSort_order(0);
+            }
+        }
     }
 }

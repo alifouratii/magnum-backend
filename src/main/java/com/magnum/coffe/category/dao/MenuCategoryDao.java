@@ -13,6 +13,8 @@ public interface MenuCategoryDao {
 
     MenuCategory save(MenuCategory category);
 
+    List<MenuCategory> saveAll(List<MenuCategory> categories);
+
     void deleteById(String id);
 
     boolean existsById(String id);

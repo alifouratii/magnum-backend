@@ -1,7 +1,5 @@
 package com.magnum.coffe.product.repositories;
 
-
-
 import com.magnum.coffe.product.model.Product;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

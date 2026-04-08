@@ -1,7 +1,5 @@
 package com.magnum.coffe.product.dao.impl;
 
-
-
 import com.magnum.coffe.product.dao.ProductDao;
 import com.magnum.coffe.product.model.Product;
 import com.magnum.coffe.product.repositories.ProductRepository;
@@ -60,6 +58,11 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public Product save(Product product) {
         return productRepository.save(product);
+    }
+
+    @Override
+    public List<Product> saveAll(List<Product> products) {
+        return productRepository.saveAll(products);
     }
 
     @Override

@@ -33,6 +33,11 @@ public class MenuCategoryDaoImpl implements MenuCategoryDao {
     }
 
     @Override
+    public List<MenuCategory> saveAll(List<MenuCategory> categories) {
+        return menuCategoryRepository.saveAll(categories);
+    }
+
+    @Override
     public void deleteById(String id) {
         menuCategoryRepository.deleteById(id);
     }
