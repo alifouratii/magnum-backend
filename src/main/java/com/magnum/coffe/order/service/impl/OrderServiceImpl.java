@@ -1,13 +1,17 @@
 package com.magnum.coffe.order.service.impl;
 
+import com.magnum.coffe.category.dao.MenuCategoryDao;
+import com.magnum.coffe.category.model.MenuCategory;
 import com.magnum.coffe.notification.model.Notification;
 import com.magnum.coffe.notification.service.NotificationService;
 import com.magnum.coffe.order.dao.OrderDao;
 import com.magnum.coffe.order.model.Order;
 import com.magnum.coffe.order.model.OrderEvent;
+import com.magnum.coffe.order.model.OrderItem;
 import com.magnum.coffe.order.service.OrderService;
 import com.magnum.coffe.order.service.OrderSseService;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,28 +23,51 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDao dao;
     private final OrderSseService orderSseService;
     private final NotificationService notificationService;
+    private final MenuCategoryDao categoryDao;
 
     public OrderServiceImpl(
             OrderDao dao,
             OrderSseService orderSseService,
-            NotificationService notificationService
+            NotificationService notificationService, MenuCategoryDao categoryDao
     ) {
         this.dao = dao;
         this.orderSseService = orderSseService;
         this.notificationService = notificationService;
+        this.categoryDao = categoryDao;
     }
 
     @Override
     public List<Order> getAll() {
         return dao.findAll();
     }
+    private void enrichItemsWithCategoryNames(Order order) {
+        if (order.getItems() == null) {
+            return;
+        }
 
+        for (OrderItem item : order.getItems()) {
+            if (item == null) {
+                continue;
+            }
+
+            String categoryId = item.getCategory_id();
+            if (categoryId == null || categoryId.isBlank()) {
+                continue;
+            }
+
+            categoryDao.findById(categoryId).ifPresent(category -> {
+                item.setCategory_name(category.getName()); // or getTitle()
+            });
+        }
+    }
     @Override
     public Order create(Order payload) {
         LocalDateTime now = LocalDateTime.now();
 
         payload.setId(null);
         payload.setOrder_number("ORD-" + System.currentTimeMillis());
+
+        enrichItemsWithCategoryNames(payload);
 
         double subtotal = payload.getItems() == null ? 0 : payload.getItems().stream()
                 .mapToDouble(i -> i.getUnit_price() * i.getQuantity())
