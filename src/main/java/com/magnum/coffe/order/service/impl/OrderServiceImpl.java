@@ -36,7 +36,37 @@ public class OrderServiceImpl implements OrderService {
         this.notificationService = notificationService;
         this.categoryDao = categoryDao;
     }
+    private void enrichItemsWithCategoryAndSubgroupNames(Order order) {
+        if (order == null || order.getItems() == null) {
+            return;
+        }
 
+        for (OrderItem item : order.getItems()) {
+            if (item == null) {
+                continue;
+            }
+
+            String categoryId = item.getCategory_id();
+            String subgroupId = item.getSubgroup_id(); // ou getSubgroupId()
+
+            if (categoryId == null || categoryId.isBlank()) {
+                continue;
+            }
+
+            categoryDao.findById(categoryId).ifPresent(category -> {
+                item.setCategory_name(category.getName()); // ou getTitle()
+
+                if (subgroupId != null && !subgroupId.isBlank() && category.getSubgroups() != null) {
+                    category.getSubgroups().stream()
+                            .filter(subgroup -> subgroup != null && subgroupId.equals(subgroup.getId()))
+                            .findFirst()
+                            .ifPresent(subgroup -> {
+                                item.setSubgroup_name(subgroup.getTitle()); // ou getTitle()
+                            });
+                }
+            });
+        }
+    }
     @Override
     public List<Order> getAll() {
         return dao.findAll();
@@ -68,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
         payload.setId(null);
         payload.setOrder_number("ORD-" + System.currentTimeMillis());
 
-        enrichItemsWithCategoryNames(payload);
+        enrichItemsWithCategoryAndSubgroupNames(payload);
 
         if (payload.getItems() != null) {
             payload.getItems().forEach(item -> {
