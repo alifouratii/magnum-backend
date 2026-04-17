@@ -10,13 +10,14 @@ import com.magnum.coffe.order.model.OrderEvent;
 import com.magnum.coffe.order.model.OrderItem;
 import com.magnum.coffe.order.service.OrderService;
 import com.magnum.coffe.order.service.OrderSseService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -68,6 +69,18 @@ public class OrderServiceImpl implements OrderService {
         payload.setOrder_number("ORD-" + System.currentTimeMillis());
 
         enrichItemsWithCategoryNames(payload);
+
+        if (payload.getItems() != null) {
+            payload.getItems().forEach(item -> {
+                log.info(
+                        "Order item: productId={}, productName={}, categoryId={}, categoryName={}",
+                        item.getProduct_id(),
+                        item.getProduct_name(),
+                        item.getCategory_id(),
+                        item.getCategory_name()
+                );
+            });
+        }
 
         double subtotal = payload.getItems() == null ? 0 : payload.getItems().stream()
                 .mapToDouble(i -> i.getUnit_price() * i.getQuantity())
