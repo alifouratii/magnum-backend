@@ -9,7 +9,7 @@ import com.magnum.coffe.waiterCall.service.WaiterCallService;
 import com.magnum.coffe.waiterCall.service.WaiterCallSseService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +44,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
 
     @Override
     public WaiterCall create(WaiterCall payload) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         payload.setId(null);
 
@@ -90,7 +90,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
                 .orElseThrow(() -> new RuntimeException("Waiter call not found with id: " + id));
 
         existing.setStatus(status);
-        existing.setUpdated_at(LocalDateTime.now());
+        existing.setUpdated_at(Instant.now());
 
         WaiterCall saved = waiterCallDao.save(existing);
 
@@ -133,7 +133,7 @@ public class WaiterCallServiceImpl implements WaiterCallService {
         existing.setCustomer_name(payload.getCustomer_name());
         existing.setNote(payload.getNote());
         existing.setStatus(status);
-        existing.setUpdated_at(LocalDateTime.now());
+        existing.setUpdated_at(Instant.now());
 
         WaiterCall saved = waiterCallDao.save(existing);
 

@@ -11,7 +11,7 @@ import com.magnum.coffe.product.model.Product;
 import com.magnum.coffe.product.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +66,7 @@ public class CartServiceImpl implements CartService {
             cart.getItems().add(item);
         }
 
-        cart.setUpdated_at(LocalDateTime.now());
+        cart.setUpdated_at(Instant.now());
         return cartDao.save(cart);
     }
 
@@ -86,7 +86,7 @@ public class CartServiceImpl implements CartService {
             });
         }
 
-        cart.setUpdated_at(LocalDateTime.now());
+        cart.setUpdated_at(Instant.now());
         return cartDao.save(cart);
     }
 
@@ -98,7 +98,7 @@ public class CartServiceImpl implements CartService {
                 item.getProduct() != null &&
                         productId.equals(item.getProduct().getId()));
 
-        cart.setUpdated_at(LocalDateTime.now());
+        cart.setUpdated_at(Instant.now());
         return cartDao.save(cart);
     }
 
@@ -108,7 +108,7 @@ public class CartServiceImpl implements CartService {
 
         cart.setUserId(request.getUserId());
         cart.setItems(request.getItems() != null ? request.getItems() : new ArrayList<>());
-        cart.setUpdated_at(LocalDateTime.now());
+        cart.setUpdated_at(Instant.now());
 
         return cartDao.save(cart);
     }
@@ -125,8 +125,8 @@ public class CartServiceImpl implements CartService {
             Cart cart = new Cart();
             cart.setCartKey(cartKey);
             cart.setItems(new ArrayList<>());
-            cart.setCreated_at(LocalDateTime.now());
-            cart.setUpdated_at(LocalDateTime.now());
+            cart.setCreated_at(Instant.now());
+            cart.setUpdated_at(Instant.now());
             return cartDao.save(cart);
         });
     }

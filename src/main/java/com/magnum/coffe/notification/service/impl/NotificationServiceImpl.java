@@ -5,7 +5,7 @@ import com.magnum.coffe.notification.model.Notification;
 import com.magnum.coffe.notification.service.NotificationService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -30,7 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Notification create(Notification notification) {
         notification.setId(null);
-        notification.setCreatedAt(LocalDateTime.now());
+        notification.setCreatedAt(Instant.now());
         notification.setRead(false);
         return notificationDao.save(notification);
     }

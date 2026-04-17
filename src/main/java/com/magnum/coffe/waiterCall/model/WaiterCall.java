@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,8 +24,8 @@ public class WaiterCall {
     private String note;
     private String status = "new";
 
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+    private Instant created_at;
+    private Instant updated_at;
 
 
 }

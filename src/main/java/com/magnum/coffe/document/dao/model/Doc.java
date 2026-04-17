@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "doc")
 @Data
@@ -25,18 +25,18 @@ public class Doc  implements Serializable {
     String title;//
     String reference;//
     byte[] file;
-    LocalDateTime creationDate;
+    Instant creationDate;
     Boolean BigData=false;
 
     @Indexed
     String userId;
-    LocalDateTime dateTimeModification;
+    Instant dateTimeModification;
     String datatypeContainer;
 
 
     String idContainner;
     Boolean used;
-    LocalDateTime dateTimeDelete;
+    Instant dateTimeDelete;
     String deleteBy;
     DocumentType docType;
     Boolean isActif;

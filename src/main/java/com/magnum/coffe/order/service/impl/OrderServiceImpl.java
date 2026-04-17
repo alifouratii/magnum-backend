@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 @Slf4j
@@ -93,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public Order create(Order payload) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         payload.setId(null);
         payload.setOrder_number("ORD-" + System.currentTimeMillis());
@@ -168,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
 
         existing.setSubtotal(subtotal);
         existing.setTotal(subtotal);
-        existing.setUpdated_at(LocalDateTime.now());
+        existing.setUpdated_at(Instant.now());
 
         Order saved = dao.save(existing);
 
