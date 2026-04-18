@@ -12,12 +12,12 @@ import com.magnum.coffe.order.service.OrderSseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-
 import java.time.Instant;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -40,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
         this.notificationService = notificationService;
         this.categoryDao = categoryDao;
     }
+
     private void enrichItemsWithCategoryAndSubgroupNames(Order order) {
         if (order == null || order.getItems() == null) {
             return;
@@ -51,22 +52,20 @@ public class OrderServiceImpl implements OrderService {
             }
 
             String categoryId = item.getCategory_id();
-            String subgroupId = item.getSubgroup_id(); // ou getSubgroupId()
+            String subgroupId = item.getSubgroup_id();
 
             if (categoryId == null || categoryId.isBlank()) {
                 continue;
             }
 
             categoryDao.findById(categoryId).ifPresent(category -> {
-                item.setCategory_name(category.getName()); // ou getTitle()
+                item.setCategory_name(category.getName());
 
                 if (subgroupId != null && !subgroupId.isBlank() && category.getSubgroups() != null) {
                     category.getSubgroups().stream()
                             .filter(subgroup -> subgroup != null && subgroupId.equals(subgroup.getId()))
                             .findFirst()
-                            .ifPresent(subgroup -> {
-                                item.setSubgroup_name(subgroup.getTitle()); // ou getTitle()
-                            });
+                            .ifPresent(subgroup -> item.setSubgroup_name(subgroup.getTitle()));
                 }
             });
         }
@@ -78,26 +77,6 @@ public class OrderServiceImpl implements OrderService {
         return dao.findAll().stream()
                 .filter(order -> matchesScope(order, normalizedScope))
                 .collect(Collectors.toList());
-    }
-    private void enrichItemsWithCategoryNames(Order order) {
-        if (order.getItems() == null) {
-            return;
-        }
-
-        for (OrderItem item : order.getItems()) {
-            if (item == null) {
-                continue;
-            }
-
-            String categoryId = item.getCategory_id();
-            if (categoryId == null || categoryId.isBlank()) {
-                continue;
-            }
-
-            categoryDao.findById(categoryId).ifPresent(category -> {
-                item.setCategory_name(category.getName());
-            });
-        }
     }
 
     @Override
@@ -112,11 +91,13 @@ public class OrderServiceImpl implements OrderService {
         if (payload.getItems() != null) {
             payload.getItems().forEach(item -> {
                 log.info(
-                        "Order item: productId={}, productName={}, categoryId={}, categoryName={}",
+                        "Order item: productId={}, productName={}, categoryId={}, categoryName={}, subgroupId={}, subgroupName={}",
                         item.getProduct_id(),
                         item.getProduct_name(),
                         item.getCategory_id(),
-                        item.getCategory_name()
+                        item.getCategory_name(),
+                        item.getSubgroup_id(),
+                        item.getSubgroup_name()
                 );
             });
         }
@@ -172,7 +153,9 @@ public class OrderServiceImpl implements OrderService {
         existing.setStatus(payload.getStatus());
         existing.setItems(payload.getItems());
 
-        double subtotal = payload.getItems() == null ? 0 : payload.getItems().stream()
+        enrichItemsWithCategoryAndSubgroupNames(existing);
+
+        double subtotal = existing.getItems() == null ? 0 : existing.getItems().stream()
                 .mapToDouble(i -> i.getUnit_price() * i.getQuantity())
                 .sum();
 
