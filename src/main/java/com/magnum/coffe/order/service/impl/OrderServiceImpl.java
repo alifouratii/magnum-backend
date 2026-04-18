@@ -1,7 +1,6 @@
 package com.magnum.coffe.order.service.impl;
 
 import com.magnum.coffe.category.dao.MenuCategoryDao;
-import com.magnum.coffe.category.model.MenuCategory;
 import com.magnum.coffe.notification.model.Notification;
 import com.magnum.coffe.notification.service.NotificationService;
 import com.magnum.coffe.order.dao.OrderDao;
@@ -12,13 +11,16 @@ import com.magnum.coffe.order.service.OrderService;
 import com.magnum.coffe.order.service.OrderSseService;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Pattern TABLE_NUMBER_PATTERN = Pattern.compile("(\\d+)");
 
     private final OrderDao dao;
     private final OrderSseService orderSseService;
@@ -28,7 +30,8 @@ public class OrderServiceImpl implements OrderService {
     public OrderServiceImpl(
             OrderDao dao,
             OrderSseService orderSseService,
-            NotificationService notificationService, MenuCategoryDao categoryDao
+            NotificationService notificationService,
+            MenuCategoryDao categoryDao
     ) {
         this.dao = dao;
         this.orderSseService = orderSseService;
@@ -37,9 +40,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getAll() {
-        return dao.findAll();
+    public List<Order> getAll(String scope) {
+        String normalizedScope = normalizeScope(scope);
+
+        return dao.findAll().stream()
+                .filter(order -> matchesScope(order, normalizedScope))
+                .collect(Collectors.toList());
     }
+
     private void enrichItemsWithCategoryNames(Order order) {
         if (order.getItems() == null) {
             return;
@@ -56,10 +64,11 @@ public class OrderServiceImpl implements OrderService {
             }
 
             categoryDao.findById(categoryId).ifPresent(category -> {
-                item.setCategory_name(category.getName()); // or getTitle()
+                item.setCategory_name(category.getName());
             });
         }
     }
+
     @Override
     public Order create(Order payload) {
         LocalDateTime now = LocalDateTime.now();
@@ -101,6 +110,7 @@ public class OrderServiceImpl implements OrderService {
                         .message(buildOrderMessage(saved))
                         .route("/admin/orders")
                         .entityId(saved.getId())
+                        .scope(resolveScope(saved.getTable_number()))
                         .build()
         );
 
@@ -146,6 +156,7 @@ public class OrderServiceImpl implements OrderService {
                         .message(buildOrderMessage(saved))
                         .route("/admin/orders")
                         .entityId(saved.getId())
+                        .scope(resolveScope(saved.getTable_number()))
                         .build()
         );
 
@@ -197,5 +208,74 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return sb.toString();
+    }
+
+    private String resolveScope(String tableValue) {
+        Integer tableNumber = extractTableNumber(tableValue);
+
+        if (tableNumber == null) {
+            return "ALL";
+        }
+
+        if (tableNumber >= 1 && tableNumber <= 15) {
+            return "SESSION1";
+        }
+
+        if (tableNumber >= 16 && tableNumber <= 30) {
+            return "SESSION2";
+        }
+
+        return "ALL";
+    }
+
+    private boolean matchesScope(Order order, String scope) {
+        if ("ALL".equals(scope)) {
+            return true;
+        }
+
+        Integer tableNumber = extractTableNumber(order == null ? null : order.getTable_number());
+        if (tableNumber == null) {
+            return false;
+        }
+
+        if ("SESSION1".equals(scope)) {
+            return tableNumber >= 1 && tableNumber <= 15;
+        }
+
+        if ("SESSION2".equals(scope)) {
+            return tableNumber >= 16 && tableNumber <= 30;
+        }
+
+        return true;
+    }
+
+    private Integer extractTableNumber(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        Matcher matcher = TABLE_NUMBER_PATTERN.matcher(value);
+        if (!matcher.find()) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(matcher.group(1));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private String normalizeScope(String scope) {
+        if (scope == null) {
+            return "ALL";
+        }
+
+        String normalized = scope.trim().toUpperCase();
+        if ("SESSION1".equals(normalized) || "SESSION2".equals(normalized) || "ALL".equals(normalized)) {
+            return normalized;
+        }
+
+        return "ALL";
     }
 }

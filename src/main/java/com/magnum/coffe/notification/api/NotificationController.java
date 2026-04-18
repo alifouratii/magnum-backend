@@ -19,23 +19,32 @@ public class NotificationController {
     }
 
     @GetMapping
-    public List<Notification> getAll() {
-        return notificationService.getAll();
+    public List<Notification> getAll(
+            @RequestParam(value = "scope", defaultValue = "ALL") String scope
+    ) {
+        return notificationService.getAll(scope);
     }
 
     @GetMapping("/unread-count")
-    public Map<String, Long> getUnreadCount() {
-        return Map.of("count", notificationService.getUnreadCount());
+    public Map<String, Long> getUnreadCount(
+            @RequestParam(value = "scope", defaultValue = "ALL") String scope
+    ) {
+        return Map.of("count", notificationService.getUnreadCount(scope));
     }
 
     @PatchMapping("/{id}/read")
-    public Notification markAsRead(@PathVariable String id) {
-        return notificationService.markAsRead(id);
+    public Notification markAsRead(
+            @PathVariable String id,
+            @RequestParam(value = "scope", defaultValue = "ALL") String scope
+    ) {
+        return notificationService.markAsRead(id, scope);
     }
 
     @PatchMapping("/read-all")
-    public Map<String, String> markAllAsRead() {
-        notificationService.markAllAsRead();
+    public Map<String, String> markAllAsRead(
+            @RequestParam(value = "scope", defaultValue = "ALL") String scope
+    ) {
+        notificationService.markAllAsRead(scope);
         return Map.of("message", "All notifications marked as read");
     }
 }

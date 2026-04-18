@@ -18,8 +18,16 @@ public class NotificationDaoImpl implements NotificationDao {
     }
 
     @Override
-    public List<Notification> findAll() {
-        return notificationRepository.findAllByOrderByCreatedAtDesc();
+    public List<Notification> findAll(String scope) {
+        String normalizedScope = normalizeScope(scope);
+
+        if ("ALL".equals(normalizedScope)) {
+            return notificationRepository.findAllByOrderByCreatedAtDesc();
+        }
+
+        return notificationRepository.findByScopeInOrderByCreatedAtDesc(
+                List.of(normalizedScope, "ALL")
+        );
     }
 
     @Override
@@ -33,7 +41,28 @@ public class NotificationDaoImpl implements NotificationDao {
     }
 
     @Override
-    public long countUnread() {
-        return notificationRepository.countByReadFalse();
+    public long countUnread(String scope) {
+        String normalizedScope = normalizeScope(scope);
+
+        if ("ALL".equals(normalizedScope)) {
+            return notificationRepository.countByReadFalse();
+        }
+
+        return notificationRepository.countByReadFalseAndScopeIn(
+                List.of(normalizedScope, "ALL")
+        );
+    }
+
+    private String normalizeScope(String scope) {
+        if (scope == null) {
+            return "ALL";
+        }
+
+        String normalized = scope.trim().toUpperCase();
+        if ("SESSION1".equals(normalized) || "SESSION2".equals(normalized) || "ALL".equals(normalized)) {
+            return normalized;
+        }
+
+        return "ALL";
     }
 }

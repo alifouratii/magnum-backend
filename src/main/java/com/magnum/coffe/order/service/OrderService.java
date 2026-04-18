@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    List<Order> getAll();
+    List<Order> getAll(String scope);
 
     Order create(Order payload);
 

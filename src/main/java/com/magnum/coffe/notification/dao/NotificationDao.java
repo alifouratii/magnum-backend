@@ -7,11 +7,11 @@ import java.util.Optional;
 
 public interface NotificationDao {
 
-    List<Notification> findAll();
+    List<Notification> findAll(String scope);
 
     Optional<Notification> findById(String id);
 
     Notification save(Notification notification);
 
-    long countUnread();
+    long countUnread(String scope);
 }

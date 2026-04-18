@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface NotificationService {
 
-    List<Notification> getAll();
+    List<Notification> getAll(String scope);
 
-    long getUnreadCount();
+    long getUnreadCount(String scope);
 
     Notification create(Notification notification);
 
-    Notification markAsRead(String id);
+    Notification markAsRead(String id, String scope);
 
-    void markAllAsRead();
+    void markAllAsRead(String scope);
 }

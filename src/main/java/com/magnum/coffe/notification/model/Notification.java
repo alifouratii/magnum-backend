@@ -24,6 +24,7 @@ public class Notification {
     private String message;
     private String route;
     private String entityId;
+    private String scope;
 
     @Builder.Default
     private boolean read = false;

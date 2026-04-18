@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends MongoRepository<Notification, String> {
     long countByReadFalse();
+    long countByReadFalseAndScopeIn(List<String> scopes);
     List<Notification> findAllByOrderByCreatedAtDesc();
+    List<Notification> findByScopeInOrderByCreatedAtDesc(List<String> scopes);
 }

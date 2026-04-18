@@ -23,8 +23,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getAll() {
-        return service.getAll();
+    public List<Order> getAll(
+            @RequestParam(value = "scope", defaultValue = "ALL") String scope
+    ) {
+        return service.getAll(scope);
     }
 
     @PostMapping
@@ -38,7 +40,9 @@ public class OrderController {
     }
 
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream() {
-        return orderSseService.connect();
+    public SseEmitter stream(
+            @RequestParam(value = "scope", defaultValue = "ALL") String scope
+    ) {
+        return orderSseService.connect(scope);
     }
 }
