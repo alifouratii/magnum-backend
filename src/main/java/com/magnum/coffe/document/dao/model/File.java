@@ -8,7 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "file")
 @Data
@@ -21,5 +21,5 @@ public class File implements Serializable {
     byte[] fileByte;
     Binary fileBinary;
     String userId;
-    LocalDateTime dateTimeModification;
+    Instant dateTimeModification;
 }

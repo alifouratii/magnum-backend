@@ -5,7 +5,7 @@ import com.magnum.coffe.product.model.Product;
 import com.magnum.coffe.product.service.ProductService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product create(Product payload) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         normalize(payload);
 
@@ -83,7 +83,7 @@ public class ProductServiceImpl implements ProductService {
             normalize(payload);
 
             if (payload.getCreatedAt() == null) {
-                payload.setCreatedAt(LocalDateTime.now());
+                payload.setCreatedAt(Instant.now());
             }
 
             if (payload.getUpdatedAt() == null) {
@@ -115,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
         existing.setAvailable(payload.getAvailable());
         existing.setSortOrder(payload.getSortOrder());
         existing.setImages(payload.getImages());
-        existing.setUpdatedAt(LocalDateTime.now());
+        existing.setUpdatedAt(Instant.now());
 
         return productDao.save(existing);
     }

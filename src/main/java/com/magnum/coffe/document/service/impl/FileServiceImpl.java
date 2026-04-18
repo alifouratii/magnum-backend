@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +64,7 @@ public class FileServiceImpl implements FileService {
             doc.setDocType(documentType);
 
         }
-        doc.setCreationDate(LocalDateTime.now());
+        doc.setCreationDate(Instant.now());
 
         return docService.createDoc(doc);
     }
